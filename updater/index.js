@@ -3,6 +3,7 @@
 const utils = require('util');
 
 const config = require('./config.json');
+// @TODO get this from the db
 const distributions = config.distributions;
 
 const getSources = require('./sources');
