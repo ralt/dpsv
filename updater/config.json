@@ -1,0 +1,9 @@
+{
+    "distributions": [
+        "stable",
+        "testing",
+        "unstable",
+        "experimental"
+    ],
+    "sources": "http://httpredir.debian.org/debian/dists/%s/main/source/Sources.gz"
+}

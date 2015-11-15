@@ -1,0 +1,16 @@
+{
+  "name": "dpsv",
+  "version": "1.0.0",
+  "description": "Debian packages source viewer",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ralt/dpsv"
+  },
+  "author": "Florian Margaine <florian@margaine.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ralt/dpsv/issues"
+  },
+  "homepage": "https://github.com/ralt/dpsv#readme"
+}
