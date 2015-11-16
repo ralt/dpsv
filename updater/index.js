@@ -1,6 +1,6 @@
 'use strict';
 
-const utils = require('util');
+const util = require('util');
 
 const config = require('./config.json');
 // @TODO get this from the db
@@ -11,7 +11,7 @@ const createOrUpdateEntries = require('./entries');
 
 module.exports = function() {
     for (distribution of distributions) {
-        getSources(util.format(config.sources, distribution))
+        getSources(util.format(config.sources, distribution), distribution)
             .then(createOrUpdateEntries)
             .done();
     }
