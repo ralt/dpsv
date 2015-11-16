@@ -1,13 +1,16 @@
 'use strict';
 
-const request = require('request-promise');
 const zlib = require('zlib');
+
+const request = require('request-promise');
 
 Promise.promisifyAll(request);
 Promise.promisifyAll(zlib);
 
-module.exports = function(sourcesArchiveUrl, distribution) {
-    return request(sourcesArchiveUrl)
+const sourcesUrl = 'http://httpredir.debian.org/debian/dists/%s/main/source/Sources.gz';
+
+module.exports = function(distribution) {
+    return request(util.format(sourcesUrl, distribution))
         .then(zlib.gunzipAsync)
         .then(parseSources(distribution));
 };

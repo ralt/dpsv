@@ -2,17 +2,21 @@
 
 const util = require('util');
 
-const config = require('./config.json');
-// @TODO get this from the db
-const distributions = config.distributions;
+const db = require('../shared/db');
 
 const getSources = require('./sources');
 const createOrUpdateEntries = require('./entries');
 
 module.exports = function() {
-    for (distribution of distributions) {
-        getSources(util.format(config.sources, distribution), distribution)
-            .then(createOrUpdateEntries)
-            .done();
-    }
+    return Promise.using(db(), function(client) {
+        return client.queryAsync({
+            name: 'get_distributions',
+            text: 'select enum_range(null::distribution)',
+            values: []
+        }).get('rows').map(function(distribution) {
+            getSources(distribution)
+                .then(createOrUpdateEntries)
+                .done();
+        });
+    });
 };
