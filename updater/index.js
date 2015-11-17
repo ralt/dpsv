@@ -1,7 +1,5 @@
 'use strict';
 
-const util = require('util');
-
 const db = require('../shared/db');
 
 const getSources = require('./sources');

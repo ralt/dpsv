@@ -1,6 +1,6 @@
 'use strict';
 
-const util = require('util');
+const format = require('util').format;
 
 const Promise = require('bluebird');
 const db = require('../shared/db');
@@ -14,7 +14,7 @@ function insertOrUpdateEntries(sources) {
             text: 'select count(*) from source where distribution = $1',
             values: [sources[0].distribution]
         }).get('rows').get(0).then(function(count) {
-            console.debug(util.format('%d sources already imported.', count));
+            console.debug(format('%d sources already imported.', count));
 
             if (count === 0) {
                 console.debug('First time importing sources.');
