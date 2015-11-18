@@ -8,15 +8,15 @@ const frontend = require('./frontend');
 const updater = require('./updater');
 const deleter = require('./deleter');
 
-if (process.argv.indexOf('--update') >= 0) {
+if (/--update\b/.test(process.argv)) {
     updater();
 }
 
-if (process.argv.indexOf('--delete') >= 0) {
+if (/--delete\b/.test(process.argv)) {
     deleter();
 }
 
-if (process.argv.indexOf('--http') >= 0) {
+if (/--http\b/.test(process.argv)) {
     http.createServer(httpServer).listen(process.env.PORT, function() {
         console.log(format('HTTP server listening on %d', process.env.PORT));
     });
