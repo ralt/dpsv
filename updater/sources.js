@@ -3,6 +3,7 @@
 const zlib = require('zlib');
 const format = require('util').format;
 
+const Promise = require('bluebird');
 const request = require('request-promise');
 
 Promise.promisifyAll(request);
