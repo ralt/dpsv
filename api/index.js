@@ -2,15 +2,15 @@
 
 const http = require('http');
 
-const urls = {
+const controllers = {
     '\\/search\\/.+': require('./search')
 };
 
 module.exports = function(req, res) {
     res.setHeader('Content-Type', 'application/json');
-    for (let url in urls) {
+    for (let url in controllers) {
         if (req.url.match(new RegExp('\\/api' + url))) {
-            return urls[url](req, res);
+            return controllers[url](req, res);
         }
     }
 
