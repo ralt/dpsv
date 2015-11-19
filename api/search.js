@@ -8,7 +8,7 @@ const db = require('../shared/db');
 
 module.exports = function(req, res) {
     Promise.using(db(), function(client) {
-        return client.queryAsync({
+        client.queryAsync({
             name: 'search_entries',
             text: "select name, version, distribution from source where name like $1",
             values: ['%' + req.url.split('/').slice(3).join('/') + '%']
