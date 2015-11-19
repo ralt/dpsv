@@ -12,7 +12,12 @@ Promise.promisifyAll(zlib);
 const sourcesUrl = 'http://httpredir.debian.org/debian/dists/%s/main/source/Sources.gz';
 
 module.exports = function(distribution) {
-    return request(format(sourcesUrl, distribution))
+    // Remove me
+    const fs = require('fs');
+    Promise.promisifyAll(fs);
+    return fs.readFileAsync('Sources', 'utf-8').then(parseSources(distribution));
+    // Remove me
+
     const url = format(sourcesUrl, distribution);
     console.log(format('Downloading %s...', url));
     return request(url)
