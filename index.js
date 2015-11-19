@@ -1,5 +1,7 @@
 'use strict';
 
+require('./shims');
+
 const http = require('http');
 const format = require('util').format;
 
