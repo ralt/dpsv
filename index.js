@@ -4,6 +4,7 @@ require('./shims');
 
 const http = require('http');
 const format = require('util').format;
+const log = require('util').log;
 
 const api = require('./api');
 const frontend = require('./frontend');
@@ -20,7 +21,7 @@ if (process.argv.indexOf('--delete') >= 0) {
 
 if (process.argv.indexOf('--http') >= 0) {
     http.createServer(httpServer).listen(process.env.PORT, function() {
-        console.log(format('HTTP server listening on %d', process.env.PORT));
+        log(format('HTTP server listening on %d', process.env.PORT));
     });
 }
 

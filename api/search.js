@@ -1,5 +1,7 @@
 'use strict';
 
+const log = require('util').log;
+
 const Promise = require('bluebird');
 
 const db = require('../shared/db');
@@ -28,7 +30,7 @@ module.exports = function(req, res) {
 
             res.end(JSON.stringify(ret, null, 4));
         }).catch(function(err) {
-            console.error(err);
+            log(err);
             res.statusCode = 500;
             res.end(JSON.stringify({status: -1}, null, 4));
         });

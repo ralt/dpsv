@@ -2,6 +2,7 @@
 
 const zlib = require('zlib');
 const format = require('util').format;
+const log = require('util').log;
 
 const Promise = require('bluebird');
 const request = require('request-promise');
@@ -19,22 +20,22 @@ module.exports = function(distribution) {
     // Remove me
 
     const url = format(sourcesUrl, distribution);
-    console.log(format('Downloading %s...', url));
+    log(format('Downloading %s...', url));
     return request(url)
         .then(function(data) {
-            console.log(format('%s downloaded.', url));
-            console.log('Uncompressing the sources...');
+            log(format('%s downloaded.', url));
+            log('Uncompressing the sources...');
             return data;
         })
         .then(zlib.gunzipAsync)
         .then(function(data) {
-            console.log(format('Sources for %s uncompressed.', distribution));
-            console.log(format('Parsing sources for %s...', distribution));
+            log(format('Sources for %s uncompressed.', distribution));
+            log(format('Parsing sources for %s...', distribution));
             return data;
         })
         .then(parseSources(distribution))
         .then(function(sources) {
-            console.log(format('Sources for %s parsed.', distribution));
+            log(format('Sources for %s parsed.', distribution));
             return sources;
         });
 };
