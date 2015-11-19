@@ -6,7 +6,7 @@ create table source (
     distribution distribution not null,
     component component not null default 'main',
     version varchar(255) not null,
-    primary key(name, distribution)
+    primary key(name, distribution, version)
 );
 
 create table source_folder (
