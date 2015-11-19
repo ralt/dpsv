@@ -1,17 +1,24 @@
 'use strict';
 
-var Promise = require('bluebird');
-var pg = require('pg');
-var connString = process.env.DATABASE_URL;
+const Promise = require('bluebird');
+const pg = require('pg');
 
-Promise.promisifyAll(pg);
+const connObj = {
+    user: 'dpsv',
+    database: 'dpsv',
+    password: 'password'
+};
+
 Promise.promisifyAll(pg.Client.prototype);
 
 module.exports = function() {
-    var close;
-    return pg.connectAsync(connString).spread(function(client, done) {
-        close = done;
-        return client;
+    let close;
+    return new Promise(function(resolve, reject) {
+        pg.connect(connObj, function(err, client, done) {
+            if (err) return reject(err);
+            close = done;
+            resolve(client);
+        });
     }).disposer(function() {
         if (close) close();
     });
