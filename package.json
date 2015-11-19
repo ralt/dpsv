@@ -7,6 +7,13 @@
     "type": "git",
     "url": "https://github.com/ralt/dpsv"
   },
+  "scripts": {
+    "start": "npm run build && npm run web",
+    "web": "node index.js --http",
+    "updater": "node index.js --update",
+    "deleter": "node index.js --delete",
+    "build": "(cd scripts; make)"
+  },
   "author": "Florian Margaine <florian@margaine.com>",
   "license": "MIT",
   "bugs": {
