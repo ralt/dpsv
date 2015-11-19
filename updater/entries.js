@@ -1,5 +1,7 @@
 'use strict';
 
+const format = require('util').format;
+
 const Promise = require('bluebird');
 const db = require('../shared/db');
 
@@ -10,17 +12,20 @@ module.exports = {
 
 function deleteEntries(distribution) {
     return Promise.using(db(), function(client) {
+        console.log(format('Deleting all the entries for %s...', distribution));
         return client.queryAsync({
             name: 'delete_entries',
             text: 'delete from source where distribution = $1',
             values: [distribution]
         }).then(function() {
+            console.log(format('Entries for %s deleted.', distribution));
             return distribution;
         });
     });
 }
 
 function insertEntries(sources) {
+    console.log(format('Inserting %d entries for %s...', sources.length, sources[0].distribution));
     // Pseudo query builder
     let params = [];
     let chunks = [];
@@ -45,6 +50,8 @@ function insertEntries(sources) {
             text: 'insert into source(name, distribution, version) values ' +
                 chunks.join(', '),
             values: params
+        }).then(function() {
+            console.log(format('Entries for %s inserted.', sources[0].distribution));
         });
     });
 }
