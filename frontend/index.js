@@ -13,6 +13,8 @@ Promise.promisifyAll(fs);
 const templatesDir = path.join(__dirname, '..', 'templates');
 
 module.exports = function(req, res) {
+    res.setHeader('Content-Type', 'text/html');
+
     const path = url.parse(req.url);
 
     if (path.pathname === '/' || path.pathname.match(/^\/search\/?/)) {
