@@ -19,7 +19,10 @@ module.exports = function(distribution) {
 
 function parseSources(distribution) {
     return function(sources) {
-        return sources.split(/\n\n/).map(parseSource(distribution));
+        let sourcesText = sources.split(/\n\n/);
+        // Last item is empty
+        sourcesText.splice(-1, 1);
+        return sourcesText.map(parseSource(distribution));
     };
 }
 
@@ -27,7 +30,7 @@ function parseSource(distribution) {
     return function(source) {
         const lines = source.split(/\n/);
         return {
-            package: getLine(lines, 'Package:'),
+            name: getLine(lines, 'Package:'),
             version: getLine(lines, 'Version:'),
             distribution: distribution
         };
@@ -37,5 +40,5 @@ function parseSource(distribution) {
 function getLine(lines, begin) {
     return lines.find(function(line) {
         return line.indexOf(begin) === 0;
-    });
+    }).match(/:(.+)$/)[1].trim();
 }
