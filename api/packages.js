@@ -73,7 +73,15 @@ function renderFilename(path, filename, res) {
     });
 }
 
-const sourceArchiveUrl = 'http://httpredir.debian.net/debian/pool/main/%s/%s/%s_%s.debian.tar.xz';
+/*
+ Debian sources are in 2 parts:
+   - The 1st archive is the original upstream source.
+   - The 2nd archive is the debian/ folder added by debian maintainers.
+ */
+const sourceArchiveUrl = 'http://httpredir.debian.net/debian/pool/main/%s/%s/%s_%s.orig.tar.gz';
+const debianSourceArchiveUrl = 'http://httpredir.debian.net/debian/pool/main/%s/%s/%s_%s.debian.tar.xz';
+
 function downloadSource(name, version) {
     const archiveUrl = f(sourceArchiveUrl, name[0], name, name, version);
+    const debianArchiveUrl = f(debianSourceArchiveUrl, name[0], name, name, version);
 }

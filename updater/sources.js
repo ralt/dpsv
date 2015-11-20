@@ -5,9 +5,9 @@ const format = require('util').format;
 const log = require('util').log;
 
 const Promise = require('bluebird');
-const request = require('request-promise');
 
-Promise.promisifyAll(request);
+const downloadArchive = require('../shared/download-archive');
+
 Promise.promisifyAll(zlib);
 
 const sourcesUrl = 'http://httpredir.debian.org/debian/dists/%s/main/source/Sources.gz';
@@ -15,7 +15,7 @@ const sourcesUrl = 'http://httpredir.debian.org/debian/dists/%s/main/source/Sour
 module.exports = function(distribution) {
     const url = format(sourcesUrl, distribution);
     log(format('Downloading %s...', url));
-    return request({ uri: url, encoding: null })
+    return downloadArchive(url)
         .then(function(data) {
             log(format('%s downloaded.', url));
             log(format('Uncompressing the sources for %s...', distribution));
