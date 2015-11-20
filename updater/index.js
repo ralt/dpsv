@@ -15,7 +15,7 @@ module.exports = function() {
             name: 'get_distributions',
             text: 'select enum_range(null::distribution)',
             values: []
-        }).get('rows').get(0).get('enum_range').then(function(range) {
+        }).get(0).get('rows').get(0).get('enum_range').then(function(range) {
             return range.match(/{(.+)}/)[1].split(',');
         }).map(function(distribution) {
             deleteEntries(distribution)
