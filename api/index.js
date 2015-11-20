@@ -2,8 +2,15 @@
 
 const http = require('http');
 
+// Monkey patch http because this method should exist
+http.ServerResponse.prototype.endWith = function(code) {
+    this.statusCode = code;
+    this.end();
+};
+
 const controllers = {
-    '\\/search\\/.+': require('./search')
+    '\\/search\\/.+': require('./search'),
+    '\\/packages\\/.+': require('./packages')
 };
 
 module.exports = function(req, res) {

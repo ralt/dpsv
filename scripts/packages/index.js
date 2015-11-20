@@ -24,7 +24,6 @@ try {
                 fileTypeRenderers[response.fileType](response.data);
                 break;
             case 202:
-                waitDiv.textContent = response.message;
                 setTimeout(r, 1000);
                 break;
             case 404:
