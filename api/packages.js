@@ -42,7 +42,7 @@ module.exports = function(req, res) {
             // tell the client to come back later.
             res.endWith(202);
 
-            return downloadSource(parts[0], parts[1], parts[2]);
+            return downloadSource(parts[1], parts[2]);
         }).catch(function(err) {
             log(err);
             res.statusCode = 500;
@@ -73,5 +73,7 @@ function renderFilename(path, filename, res) {
     });
 }
 
-function downloadSource(distribution, name, version) {
+const sourceArchiveUrl = 'http://httpredir.debian.net/debian/pool/main/%s/%s/%s_%s.debian.tar.xz';
+function downloadSource(name, version) {
+    const archiveUrl = f(sourceArchiveUrl, name[0], name, name, version);
 }
