@@ -1,7 +1,9 @@
 'use strict';
 
 var xhr = require('../shared/xhr');
+var throttle = require('../shared/throttler');
 
+// For documentation purpose
 var STATUS_OK = 0;
 var STATUS_NO_RESULT = 1;
 var STATUS_TOO_MANY_RESULTS = 2;
@@ -24,22 +26,39 @@ function search(str) {
 var searchInput = document.querySelector('#search');
 
 searchInput.addEventListener('input', function() {
-    return search(this.value);
+    window.history.pushState({}, '', '?' + this.value);
+    window.onpopstate();
 });
+
+
+window.onpopstate = throttle(300, function() {
+    if (searchInput.value === '') {
+        clearResults();
+        return;
+    }
+    search(window.location.search.slice(1));
+});
+
+if (window.location.search.length > 1) {
+    search(window.location.search.slice(1));
+    searchInput.value = window.location.search.slice(1);
+}
 
 var resultsTable = document.querySelector('#results');
 
-// Remove all the current results, then add the new ones.
-function renderResults(results) {
+function clearResults() {
     var trs = resultsTable.querySelectorAll('tbody > tr');
-    var i;
-    for (i = 0; i < trs.length; i++) {
+    for (var i = 0; i < trs.length; i++) {
         trs[i].remove();
     }
+}
+
+function renderResults(results) {
+    clearResults();
 
     var tbody = resultsTable.querySelector('tbody');
     var newTr;
-    for (i = 0; i < results.length; i++) {
+    for (var i = 0; i < results.length; i++) {
         newTr = makeRow(results[i], !(i % 2));
         tbody.appendChild(newTr);
     }
