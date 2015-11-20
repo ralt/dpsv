@@ -18,7 +18,7 @@ module.exports = function(distribution) {
     return request({ uri: url, encoding: null })
         .then(function(data) {
             log(format('%s downloaded.', url));
-            log(format('Uncompressing the sources for %s...', url));
+            log(format('Uncompressing the sources for %s...', distribution));
             return data;
         })
         .then(zlib.gunzipAsync)
