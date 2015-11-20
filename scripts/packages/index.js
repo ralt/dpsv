@@ -25,7 +25,7 @@ try {
     findSource(source).spread(function(status, response) {
         switch (status) {
         case 200:
-            document.querySelector('#header').addClass('up');
+            document.querySelector('#header').classList.add('up');
             fileTypeRenderers[response.fileType](response.data);
             break;
         case 202:
