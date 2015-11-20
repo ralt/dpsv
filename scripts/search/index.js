@@ -18,7 +18,6 @@ renderers[-1] = renderError;
 
 function search(str) {
     return xhr('/api/search/' + str).then(function(response) {
-        hideAlerts();
         return renderers[response.status](response.results);
     });
 }
@@ -51,6 +50,7 @@ function clearResults() {
     for (var i = 0; i < trs.length; i++) {
         trs[i].remove();
     }
+    hideAlerts();
 }
 
 function renderResults(results) {
