@@ -14,29 +14,36 @@ var fileTypeRenderers = {
     folder: folderRenderer
 };
 
+var source;
 try {
-    var source = pathToSource(window.location.pathname);
-    (function r() {
-        findSource(source).spread(function(status, response) {
-            switch (status) {
-            case 200:
-                document.querySelector('#header').addClass('up');
-                fileTypeRenderers[response.fileType](response.data);
-                break;
-            case 202:
-                setTimeout(r, 1000);
-                break;
-            case 404:
-                throw new Error(
-                    format("The file %s was not found in this package.", source.filename)
-                );
-            case 500:
-                throw new Error('There was a server error. Please try again later.');
-            }
-        });
-    }());
+    source = pathToSource(window.location.pathname);
+} catch(e) {
+    catchError(e);
 }
-catch (e) {
+
+(function r() {
+    findSource(source).spread(function(status, response) {
+        switch (status) {
+        case 200:
+            document.querySelector('#header').addClass('up');
+            fileTypeRenderers[response.fileType](response.data);
+            break;
+        case 202:
+            setTimeout(r, 1000);
+            break;
+        case 404:
+            throw new Error(
+                format("The file %s was not found in this source.", source.filename)
+            );
+        default:
+            throw new Error('There was a server error. Please try again later.');
+        }
+    }).catch(function(e) {
+        catchError(e);
+    });
+}());
+
+function catchError(e) {
     waitDiv.remove();
     showError(e.message);
 }
@@ -70,6 +77,7 @@ function findSource(source) {
         xhr.responseType = 'json';
         xhr.open('GET', url);
         xhr.send();
+    });
 }
 
 function pathToSource(path) {
