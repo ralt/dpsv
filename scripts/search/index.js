@@ -2,6 +2,7 @@
 
 var xhr = require('../shared/xhr');
 var throttle = require('../shared/throttler');
+var format = require('../shared/format');
 
 // For documentation purpose
 var STATUS_OK = 0;
@@ -17,7 +18,7 @@ var renderers = {
 renderers[-1] = renderError;
 
 function search(str) {
-    return xhr('/api/search/' + str).then(function(response) {
+    return xhr(format('/api/search/%s', str)).then(function(response) {
         return renderers[response.status](response.results);
     });
 }
@@ -25,7 +26,7 @@ function search(str) {
 var searchInput = document.querySelector('#search');
 
 searchInput.addEventListener('input', function() {
-    window.history.pushState({}, '', '?' + this.value);
+    window.history.pushState({}, '', format('?%s', this.value));
     window.onpopstate();
 });
 
@@ -78,8 +79,12 @@ function makeRow(result, isEven) {
     versionTd.textContent = result.version;
 
     var anchor = document.createElement('a');
-    anchor.href = '/packages/' + result.distribution + '/' +
-        result.name + '/' + result.version + '/';
+    anchor.href = format(
+        '/packages/%s/%s/%s/',
+        result.distribution,
+        result.name,
+        result.version
+    );
     anchor.textContent = 'view source';
     linkTd.appendChild(anchor);
 
