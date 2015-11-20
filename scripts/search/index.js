@@ -92,7 +92,8 @@ function makeRow(result, isEven) {
 }
 
 function renderNoResult() {
-    // Don't do anything
+    clearResults();
+    showWarning('No result found.');
 }
 
 function renderTooManyResults(results) {
