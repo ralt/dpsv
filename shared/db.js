@@ -9,16 +9,14 @@ const connObj = {
     password: 'password'
 };
 
+Promise.promisifyAll(pg, { multiArgs: true });
 Promise.promisifyAll(pg.Client.prototype);
 
 module.exports = function() {
     let close;
-    return new Promise(function(resolve, reject) {
-        pg.connect(connObj, function(err, client, done) {
-            if (err) return reject(err);
-            close = done;
-            resolve(client);
-        });
+    return pg.connectAsync(connObj).spread(function(client, done) {
+        close = done;
+        return client;
     }).disposer(function() {
         if (close) close();
     });
