@@ -3,9 +3,17 @@
   <head>
     <meta charset="UTF-8"/>
     <title>Package</title>
+    <link rel="stylesheet" href="/static/styles.css">
   </head>
   <body>
-    <div id="body"></div>
+    <div class="header">
+      Debian Packages Source Viewer
+    </div>
+    <div class="wait" id="wait">
+      Please wait while I'm fetching the sources...
+    </div>
+    <div id="warning" class="warning alert" hidden></div>
+    <div id="error" class="error alert" hidden></div>
     <script src="/static/packages.js"></script>
   </body>
 </html>

@@ -1,1 +1,89 @@
 'use strict';
+
+var xhr = require('../shared/xhr');
+var format = require('../shared/format');
+
+var distributions = ['stable', 'testing', 'unstable', 'experimental'];
+
+var waitDiv = document.querySelector('#wait');
+
+var ENOENT = -2;
+var SERVER_ERROR = -1;
+var SUCCESS = 0;
+var EAGAIN = 1;
+
+var fileTypeRenderers = {
+    file: fileRenderer,
+    folder: folderRenderer
+};
+
+try {
+    var source = pathToSource(window.location.pathname);
+    (function r() {
+        findSource(source).then(function(response) {
+            switch (response.status) {
+            case EAGAIN:
+                waitDiv.textContent = response.message;
+                setTimeout(r, 1000);
+                break;
+            case ENOENT:
+                throw new Error(
+                    format("The file %s was not found in this package.", source.filename)
+                );
+            case SERVER_ERROR:
+                throw new Error('There was a server error. Please try again later.');
+            case SUCCESS:
+                document.querySelector('#header').addClass('up');
+                fileTypeRenderers[response.fileType](response.data);
+                break;
+            }
+        });
+    }());
+}
+catch (e) {
+    waitDiv.remove();
+    showError(e.message);
+}
+
+function fileRenderer(data) {
+}
+
+function folderRenderer(data) {
+}
+
+function findSource(source) {
+    var url = format(
+        '/api/packages/%s/%s/%s/%s',
+        source.distribution,
+        source.name,
+        source.version,
+        source.filename
+    );
+    return xhr(url);
+}
+
+function pathToSource(path) {
+    var parts = path.split('/').filter(Boolean).slice(1);
+    if (distributions.indexOf(parts[0]) === -1) {
+        throw new Error(
+            format("The distribution %s doesn't exist or isn't supported.", parts[0])
+        );
+    }
+
+    if (parts.length < 3) {
+        throw new Error("The URL you're trying to reach is too short.");
+    }
+
+    var source = {};
+    source.distribution = parts[0];
+    source.name = parts[1];
+    source.version = parts[2];
+    source.filename = parts.slice(3).join('/');
+    return source;
+}
+
+function showError(msg) {
+    var errorDiv = document.querySelector('#error');
+    errorDiv.textContent = msg;
+    errorDiv.hidden = false;
+}
