@@ -27,32 +27,17 @@ function deleteEntries(distribution) {
 
 function insertEntries(sources) {
     log(format('Inserting %d entries for %s...', sources.length, sources[0].distribution));
-    // Pseudo query builder
-    let params = [];
-    let chunks = [];
-    for (let i = 0; i < sources.length; i++) {
-        let source = sources[i];
-        let valuesClause = [];
+    return Promise.map(sources, insertEntry).then(function() {
+        log(format('Entries for %s inserted.', sources[0].distribution));
+    });
+}
 
-        params.push(source.name);
-        valuesClause.push('$' + params.length);
-
-        params.push(source.distribution);
-        valuesClause.push('$' + params.length);
-
-        params.push(source.version);
-        valuesClause.push('$' + params.length);
-
-        chunks.push('(' + valuesClause.join(', ') + ')');
-    }
+function insertEntry(source) {
     return Promise.using(db(), function(client) {
         return client.queryAsync({
-            name: 'insert_sources',
-            text: 'insert into source(name, distribution, version) values ' +
-                chunks.join(', '),
-            values: params
-        }).then(function() {
-            log(format('Entries for %s inserted.', sources[0].distribution));
+            name: 'insert_source',
+            text: 'insert into source(name, distribution, version) values ($1, $2, $3)',
+            values: [source.name, source.distribution, source.version]
         });
     });
 }
