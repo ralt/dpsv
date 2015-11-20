@@ -12,7 +12,7 @@ module.exports = function(req, res) {
             name: 'search_entries',
             text: "select name, version, distribution from source where name like $1",
             values: ['%' + req.url.split('/').slice(3).join('/') + '%']
-        }).get('rows').then(function(entries) {
+        }).get(0).get('rows').then(function(entries) {
             let ret = {};
             if (entries.length === 0) {
                 ret.status = 1;
