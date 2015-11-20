@@ -32,6 +32,7 @@ module.exports = function(req, res) {
         }).catch(function(err) {
             log(err);
             res.statusCode = 500;
+            // @TODO use the same system as api/packages.js
             res.end(JSON.stringify({status: -1}, null, 4));
         });
     });
