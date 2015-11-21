@@ -78,10 +78,8 @@ function renderFilename(path, filename, res) {
     }).then(function(content) {
         res.end(JSON.stringify({
             fileType: fileType,
-            data: {
-                breadcrumb: filename.split('/'),
-                content: content
-            }
+            breadcrumb: filename.split('/'),
+            content: content
         }));
     }).catch(function() {
         // Source exists but not the filename

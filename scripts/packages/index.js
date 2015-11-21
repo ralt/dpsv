@@ -28,8 +28,8 @@ try {
         case 200:
             document.querySelector('#header').classList.add('up');
             waitDiv.remove();
-            renderBreadcrumb(response.data.breadcrumb);
-            fileTypeRenderers[response.fileType](response.data);
+            renderBreadcrumb(response.breadcrumb);
+            fileTypeRenderers[response.fileType](response.content);
             break;
         case 202:
             setTimeout(r, 1000);
@@ -89,10 +89,10 @@ function breadcrumbUrl(item, index) {
     return format('%s/%s', begin, rest.slice(0, index).join('/'));
 }
 
-function fileRenderer(data) {
+function fileRenderer(content) {
 }
 
-function folderRenderer(data) {
+function folderRenderer(content) {
 }
 
 function findSource(source) {
