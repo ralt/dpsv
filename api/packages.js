@@ -13,7 +13,9 @@ Promise.promisifyAll(fs);
 const execAsync = Promise.promisify(exec);
 
 const db = require('../shared/db');
-const downloadArchive = require('../shared/download-archive');
+
+const render = require('./renderer');
+const downloadSource = require('./source-downloader');
 
 let locks = [];
 
@@ -47,7 +49,7 @@ module.exports = function(req, res) {
                 values: [f('%%%s_%s', parts[1], parts[2])]
             }).get(0).then(function(result) {
                 if (result.rowCount > 0) {
-                    return renderFilename(result.rows[0].path, parts.slice(3).join('/'), res);
+                    return render(result.rows[0].path, parts.slice(3).join('/'), res);
                 }
 
                 // In this case, we haven't downloaded the source,
@@ -67,119 +69,6 @@ module.exports = function(req, res) {
     });
 };
 
-function renderFilename(path, filename, res) {
-    let fileType;
-    let realpath = f('%s/%s', path, filename);
-    fs.statAsync(realpath).then(function(stats) {
-        fileType = stats.isFile() ? 'file' : 'folder';
-        return stats.isFile() ?
-            fs.readFileAsync(realpath, 'utf-8') :
-            renderFolder(realpath);
-    }).then(function(content) {
-        res.end(JSON.stringify({
-            fileType: fileType,
-            breadcrumb: filename.split('/'),
-            content: content
-        }));
-    }).catch(function() {
-        // Source exists but not the filename
-        res.endWith(404);
-    });
-}
-
-function renderFolder(realpath) {
-    return fs.readdirAsync(realpath).map(function(filename) {
-        return fs.statAsync(f('%s/%s', realpath, filename)).then(function(stat) {
-            return {
-                name: filename,
-                isFile: stat.isFile(),
-                isFolder: stat.isDirectory(),
-                mode: stat.mode,
-                birthtime: stat.birthtime.getTime(),
-                mtime: stat.mtime.getTime()
-            };
-        });
-    });
-}
-
-/*
- Debian sources are in 2 parts:
-   - The 1st archive is the original upstream source.
-   - The 2nd archive is the debian/ folder added by debian maintainers.
- */
-const sourceArchiveUrl = 'http://http.debian.net/debian/pool/main/%s/%s/%s_%s.orig.tar.gz';
-const debianSourceArchiveUrl = 'http://http.debian.net/debian/pool/main/%s/%s/%s_%s.debian.tar.xz';
-
-const baseFolder = process.env.BASE_FOLDER || '/tmp';
-
-function downloadSource(name, version) {
-    const archiveUrl = f(sourceArchiveUrl, name[0], name, name, getOrigVersion(version));
-    const debianArchiveUrl = f(debianSourceArchiveUrl, name[0], name, name, version);
-
-    return Promise.using(db(), function(client) {
-        return Promise.all([
-            downloadArchive(archiveUrl),
-            downloadArchive(debianArchiveUrl)
-        ]).spread(function(archive, debianArchive) {
-            return [
-                fs.writeFileAsync(
-                    getArchiveFilename(name, version),
-                    archive
-                ),
-                fs.writeFileAsync(
-                    getDebianArchiveFilename(name, version),
-                    debianArchive
-                )
-            ];
-        }).then(function() {
-            // First, extract the original source,
-            // then, the debian archive.
-            return execAsync(f(
-                'mkdir -p %s && tar xf %s --strip-components=1 -C %s',
-                getSourceFolder(name, version),
-                getArchiveFilename(name, version),
-                getSourceFolder(name, version)
-            ));
-        }).then(function() {
-            return execAsync(f(
-                'tar xf %s -C %s',
-                getDebianArchiveFilename(name, version),
-                getSourceFolder(name, version)
-            ));
-        }).then(function() {
-            return client.queryAsync({
-                name: 'insert_source_folder',
-                text: 'insert into source_folder (path) values($1)',
-                values: [getSourceFolder(name, version)]
-            });
-        }).then(function() {
-            // Clean up the archives
-            return [
-                fs.unlinkAsync(getArchiveFilename(name, version)),
-                fs.unlinkAsync(getDebianArchiveFilename(name, version))
-            ];
-        }).catch(function(err) {
-            log(err);
-        });
-    });
-}
-
 function getLockName(name, version) {
     return f('%s:%s', name, version);
-}
-
-function getOrigVersion(version) {
-    return version.replace(/-.*/, '');
-}
-
-function getArchiveFilename(name, version) {
-    return path.join(baseFolder, path.sep, f('%s_%s.orig.tar.gz', name, version));
-}
-
-function getDebianArchiveFilename(name, version) {
-    return path.join(baseFolder, path.sep, f('%s_%s.tar.xz', name, version));
-}
-
-function getSourceFolder(name, version) {
-    return path.join(baseFolder, path.sep, f('%s_%s', name, version));
 }
