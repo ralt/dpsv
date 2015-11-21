@@ -85,8 +85,8 @@ function renderBreadcrumbLinks(items) {
 
 function breadcrumbUrl(item, index) {
     var begin = window.location.pathname.split('/').slice(0, 5).join('/');
-    var rest = window.location.pathname.split('/').slice(5);
-    return format('%s/%s/', begin, rest.slice(0, index).join('/'));
+    var rest = window.location.pathname.split('/').slice(5).slice(0, index);
+    return format(rest.length ? '%s/%s/' : '%s/', begin, rest);
 }
 
 function fileRenderer(content) {
