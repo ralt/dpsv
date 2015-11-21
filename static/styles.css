@@ -10,7 +10,6 @@ body {
     font-size: 2em;
     font-weight: bold;
     padding: 10% 0 5% 0;
-    transition: all 1s ease;
 }
 
 .header.up {
@@ -93,4 +92,11 @@ body {
 
 .folder-container a {
     color: #999;
+}
+
+.file-container {
+    text-align: left;
+    border: 1px solid;
+    padding: 10px;
+    word-wrap: break-word;
 }

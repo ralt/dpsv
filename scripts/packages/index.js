@@ -86,10 +86,13 @@ function renderBreadcrumbLinks(items) {
 function breadcrumbUrl(item, index) {
     var begin = window.location.pathname.split('/').slice(0, 5).join('/');
     var rest = window.location.pathname.split('/').slice(5);
-    return format('%s/%s', begin, rest.slice(0, index).join('/'));
+    return format('%s/%s/', begin, rest.slice(0, index).join('/'));
 }
 
 function fileRenderer(content) {
+    var fileDiv = document.querySelector('#file-container');
+    fileDiv.textContent = content;
+    fileDiv.hidden = false;
 }
 
 function folderRenderer(content) {
@@ -125,7 +128,7 @@ function createElementFolder(item, className) {
     var nameTd = document.createElement('td');
     var nameAnchor = document.createElement('a');
     nameAnchor.textContent = item.name;
-    nameAnchor.href = item.name;
+    nameAnchor.href = item.name + (item.isFolder ? '/' : '');
     nameTd.appendChild(nameAnchor);
     var modeTd = document.createElement('td');
     modeTd.textContent = item.mode.toString('8').slice(-3);
