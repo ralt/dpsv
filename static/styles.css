@@ -1,26 +1,28 @@
-body {
+.container {
     margin: 1% auto;
     width: 50%;
-    text-align: center;
-    border: 1px solid #ddd;
-    padding: 0 5% 5% 5%;
+    padding: 1% 5%;
 }
 
 .header {
+    text-align: center;
     font-size: 2em;
     font-weight: bold;
-    padding: 10% 0 5% 0;
+    padding: 30px;
+    transition: all 0.5s ease;
 }
 
 .header.up {
     font-size: 1.3em;
-    padding: 3% 0 5% 0;
+    padding: 0;
 }
 
 .search {
     width: 50%;
     padding: 15px;
     font-size: 16px;
+    margin: auto;
+    display: block;
 }
 
 .results {
@@ -68,9 +70,16 @@ body {
     background: red;
 }
 
+.wait {
+    text-align: center;
+    font-size: 1.3em;
+    margin: 60px;
+}
+
 .breadcrumb {
     text-align: left;
     font-size: 1.1em;
+    margin-bottom: 30px;
 }
 
 .breadcrumb > div {

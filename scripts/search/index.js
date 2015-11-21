@@ -52,6 +52,7 @@ function clearResults() {
         trs[i].remove();
     }
     hideAlerts();
+    resultsTable.hidden = true;
 }
 
 function renderResults(results) {
@@ -63,6 +64,8 @@ function renderResults(results) {
         newTr = makeRow(results[i], !(i % 2));
         tbody.appendChild(newTr);
     }
+
+    resultsTable.hidden = false;
 }
 
 function makeRow(result, isEven) {

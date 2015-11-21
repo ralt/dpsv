@@ -9,27 +9,31 @@
     <div class="header" id="header">
       Debian Packages Source Viewer
     </div>
-    <div class="wait" id="wait">
-      Please wait while I'm fetching the sources...
+    <div class="container">
+      <div class="wait" id="wait">
+        Please wait while I'm fetching the sources...
+      </div>
+      <div id="warning" class="warning alert" hidden></div>
+      <div id="error" class="error alert" hidden></div>
+      <div id="breadcrumb" class="breadcrumb" hidden></div>
+      <div style="clear: both"></div>
+      <table id="folder-container" class="folder-container" hidden>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Name</th>
+            <th>Mode</th>
+            <th>Creation time</th>
+            <th>Modification time</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      <pre id="file-container" class="file-container" hidden></pre>
     </div>
-    <div id="warning" class="warning alert" hidden></div>
-    <div id="error" class="error alert" hidden></div>
-    <div id="breadcrumb" class="breadcrumb" hidden></div>
-    <div style="clear: both"></div>
-    <table id="folder-container" class="folder-container" hidden>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Name</th>
-          <th>Mode</th>
-          <th>Creation time</th>
-          <th>Modification time</th>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
-    <pre id="file-container" class="file-container" hidden></pre>
+    <div class="footer">
+    </div>
     <script src="/static/packages.js"></script>
   </body>
 </html>

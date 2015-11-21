@@ -9,21 +9,23 @@
     <div class="header">
       Debian Packages Source Viewer
     </div>
-    <input id="search" class="search" autofocus>
-    <div id="warning" class="warning alert" hidden></div>
-    <div id="error" class="error alert" hidden></div>
-    <table class="results" id="results">
-      <thead>
-        <tr>
-          <th>Distribution</th>
-          <th>Package</th>
-          <th>Version</th>
-          <th>Link</th>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
+    <div class="container">
+      <input id="search" class="search" autofocus>
+      <div id="warning" class="warning alert" hidden></div>
+      <div id="error" class="error alert" hidden></div>
+      <table class="results" id="results" hidden>
+        <thead>
+          <tr>
+            <th>Distribution</th>
+            <th>Package</th>
+            <th>Version</th>
+            <th>Link</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
     <script src="/static/search.js"></script>
   </body>
 </html>
