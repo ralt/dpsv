@@ -1,3 +1,7 @@
+body {
+    font-family: Arial;
+}
+
 .container {
     margin: 1% auto;
     width: 50%;
@@ -6,16 +10,32 @@
 
 .header {
     text-align: center;
-    font-family: Arial;
     font-size: 2em;
     font-weight: bold;
     padding: 30px;
     transition: all 0.5s ease;
 }
 
+.header a {
+    text-decoration: none;
+    color: black;
+}
+
 .header.up {
     font-size: 1.3em;
     padding: 0;
+}
+
+.footer {
+    font-size: 12px;
+    position: fixed;
+    bottom: 5px;
+    right: 10px;
+}
+
+.footer div {
+    margin: 5px;
+    display: inline-block;
 }
 
 .search {
