@@ -4,12 +4,16 @@ const http = require('http');
 const log = require('util').log;
 const f = require('util').format;
 const fs = require('fs');
+const path = require('path');
+const exec = require('child_process').exec;
 
 const Promise = require('bluebird');
 
 Promise.promisifyAll(fs);
+const execAsync = Promise.promisify(exec);
 
 const db = require('../shared/db');
+const downloadSource = require('../shared/download-source');
 
 module.exports = function(req, res) {
     const parts = req.url.split('/').slice(3);
@@ -30,7 +34,7 @@ module.exports = function(req, res) {
             return client.queryAsync({
                 name: 'get_source_folder',
                 text: 'select path from source_folder where path like $1',
-                values: [f('%%%s/%s/%s', parts[0], parts[1], parts[2])]
+                values: [f('%%%s/%s', parts[1], parts[2])]
             });
         }).get(0).get('rows').then(function(rows) {
             if (rows[0]) {
@@ -96,7 +100,57 @@ function renderFolder(realpath) {
 const sourceArchiveUrl = 'http://httpredir.debian.net/debian/pool/main/%s/%s/%s_%s.orig.tar.gz';
 const debianSourceArchiveUrl = 'http://httpredir.debian.net/debian/pool/main/%s/%s/%s_%s.debian.tar.xz';
 
+const baseFolder = process.env.BASE_FOLDER || '/tmp';
+
 function downloadSource(name, version) {
     const archiveUrl = f(sourceArchiveUrl, name[0], name, name, version);
     const debianArchiveUrl = f(debianSourceArchiveUrl, name[0], name, name, version);
+
+    [downloadSource(archiveUrl), downloadSource(debianArchiveUrl)].spread(function(archive, debianArchive) {
+        return [
+            fs.writeFileAsync(
+                getArchiveFilename(name, version),
+                archive
+            ),
+            fs.writeFileAsync(
+                getDebianArchiveFilename(name, version),
+                debianArchive
+            ),
+        ];
+    }).spread(function() {
+        // First, extract the original source,
+        // then, the debian archive.
+            return execAsync(f(
+                'mkdir -p %s && tar xf %s --strip-components=1 -C %s',
+                getSourceFolder(name, version),
+                getArchiveFilename(name, version),
+                getSourceFolder(name, version)
+            ));
+    }).then(function() {
+        return execAsync(f(
+            'tar xf %s -C %s',
+            getDebianArchiveFilename(name, version),
+            getSourceFolder(name, version)
+        ));
+    }).then(function() {
+        Promise.using(db(), function(client) {
+            client.queryAsync({
+                name: 'insert_source_folder',
+                text: 'insert into source_folder (path) values($1)',
+                values: [getSourceFolder(name, version)]
+            });
+        });
+    });
+}
+
+function getArchiveFilename(name, version) {
+    return path.join(baseFolder, path.sep, name, '_', version, '.orig.tar.gz');
+}
+
+function getDebianArchiveFilename(name, version) {
+    return path.join(baseFolder, path.sep, name, '_', version, '.tar.xz');
+}
+
+function getSourceFolder(name, version) {
+    return path.join(baseFolder, path.sep, name, '_', version);
 }
