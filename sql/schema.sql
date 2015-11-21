@@ -13,3 +13,7 @@ create table source_folder (
     path varchar(255) primary key,
     created timestamp not null default current_timestamp
 );
+
+create table lock (
+    name varchar(255) primary key
+);
