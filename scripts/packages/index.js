@@ -4,15 +4,16 @@ var Promise = require('bluebird');
 
 var xhr = require('../shared/xhr');
 var format = require('../shared/format');
-var butlast = require('../shared/butlast');
+
+var renderBreadcrumb = require('./breadcrumb');
 
 var distributions = ['stable', 'testing', 'unstable', 'experimental'];
 
 var waitDiv = document.querySelector('#wait');
 
 var fileTypeRenderers = {
-    file: fileRenderer,
-    folder: folderRenderer
+    file: require('./renderers').file,
+    folder: require('./renderers').folder
 };
 
 var source;
@@ -32,7 +33,7 @@ try {
             fileTypeRenderers[response.fileType](response.content);
             break;
         case 202:
-            setTimeout(r, 1000);
+            window.setTimeout(r, 1000);
             break;
         case 404:
             throw new Error(
@@ -49,108 +50,6 @@ try {
 function catchError(e) {
     waitDiv.remove();
     showError(e.message);
-}
-
-var breadcrumbDiv = document.querySelector('#breadcrumb');
-function renderBreadcrumb(bc) {
-    var breadcrumb = bc.slice(0);
-    var isRoot = bc.length === 1 && bc[0] === '';
-    if (!isRoot) {
-        // Prepend a root item only when it's not root
-        breadcrumb.unshift('');
-    }
-
-    var links = renderBreadcrumbLinks(butlast(breadcrumb));
-    for (var i = 0; i < links.length; i++) {
-        breadcrumbDiv.appendChild(links[i]);
-    }
-
-    var lastElement = document.createElement('div');
-    lastElement.textContent = breadcrumb[breadcrumb.length - 1] || '/';
-    breadcrumbDiv.appendChild(lastElement);
-
-    breadcrumbDiv.hidden = false;
-}
-
-function renderBreadcrumbLinks(items) {
-    return items.map(function(item, index) {
-        var breadcrumbItem = document.createElement('div');
-        var breadcrumbAnchor = document.createElement('a');
-        breadcrumbAnchor.textContent = item || '/';
-        breadcrumbAnchor.href = breadcrumbUrl(item, index);
-        breadcrumbItem.appendChild(breadcrumbAnchor);
-        return breadcrumbItem;
-    });
-}
-
-function breadcrumbUrl(item, index) {
-    var begin = window.location.pathname.split('/').slice(0, 5).join('/');
-    var rest = window.location.pathname.split('/').slice(5).slice(0, index);
-    return format(rest.length ? '%s/%s/' : '%s/', begin, rest);
-}
-
-function fileRenderer(content) {
-    var fileDiv = document.querySelector('#file-container');
-    fileDiv.textContent = content;
-    fileDiv.hidden = false;
-}
-
-function folderRenderer(content) {
-    var folderDiv = document.querySelector('#folder-container');
-    var folderTbody = folderDiv.querySelector('tbody');
-
-    var items = content.sort(function(a, b) {
-        return a.name.charCodeAt(0) - b.name.charCodeAt(0);
-    });
-    var folders = items.filter(function(item) {
-        return item.isFolder;
-    }).map(createFolderElement);
-    var files = items.filter(function(item) {
-        return item.isFile;
-    }).map(createFileElement);
-
-    for (var i = 0; i < folders.length; i++) {
-        folderTbody.appendChild(folders[i]);
-    }
-
-    for (var i = 0; i < files.length; i++) {
-        folderTbody.appendChild(files[i]);
-    }
-
-    folderDiv.hidden = false;
-}
-
-function createElementFolder(item, className) {
-    var tr = document.createElement('tr');
-    tr.className = className;
-    var typeTd = document.createElement('td');
-    typeTd.textContent = item.isFolder ? 'D' : 'F';
-    var nameTd = document.createElement('td');
-    var nameAnchor = document.createElement('a');
-    nameAnchor.textContent = item.name;
-    nameAnchor.href = item.name + (item.isFolder ? '/' : '');
-    nameTd.appendChild(nameAnchor);
-    var modeTd = document.createElement('td');
-    modeTd.textContent = item.mode.toString('8').slice(-3);
-    var creationTd = document.createElement('td');
-    creationTd.textContent = new Date(item.birthtime).toDateString();
-    var modificationTd = document.createElement('td');
-    modificationTd.textContent = new Date(item.mtime).toDateString();
-
-    var tds = [typeTd, nameTd, modeTd, creationTd, modificationTd];
-    tds.forEach(function(td) {
-        tr.appendChild(td);
-    });
-
-    return tr;
-}
-
-function createFolderElement(item) {
-    return createElementFolder(item, 'folder');
-}
-
-function createFileElement(item) {
-    return createElementFolder(item, 'file');
 }
 
 function findSource(source) {
