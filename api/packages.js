@@ -58,7 +58,7 @@ function renderFilename(path, filename, res) {
         fileType = stats.isFile() ? 'file' : 'folder';
         return stats.isFile() ?
             fs.readFileAsync(realpath, 'utf-8') :
-            fs.readdirAsync(realpath);
+            renderFolder(realpath);
     }).then(function(content) {
         res.end(JSON.stringify({
             fileType: fileType,
@@ -70,6 +70,21 @@ function renderFilename(path, filename, res) {
     }).catch(function() {
         // Source exists but not the filename
         res.endWith(404);
+    });
+}
+
+function renderFolder(realpath) {
+    return fs.readdirAsync(realpath).map(function(filename) {
+        return fs.statAsync(f('%s/%s', realpath, filename)).then(function(stat) {
+            return {
+                name: filename,
+                isFile: stat.isFile(),
+                isFolder: stat.isDirectory(),
+                mode: stat.mode,
+                birthtime: stat.birthtime.getTime(),
+                mtime: stat.mtime.getTime()
+            };
+        });
     });
 }
 
