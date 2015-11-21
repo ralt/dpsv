@@ -82,3 +82,15 @@ body {
 .breadcrumb a {
     color: #999;
 }
+
+.folder-container {
+    width: 100%;
+}
+
+.folder-container tr {
+    text-align: left;
+}
+
+.folder-container a {
+    color: #999;
+}
