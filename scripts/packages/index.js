@@ -4,6 +4,7 @@ var Promise = require('bluebird');
 
 var xhr = require('../shared/xhr');
 var format = require('../shared/format');
+var butlast = require('../shared/butlast');
 
 var distributions = ['stable', 'testing', 'unstable', 'experimental'];
 
@@ -26,6 +27,8 @@ try {
         switch (status) {
         case 200:
             document.querySelector('#header').classList.add('up');
+            waitDiv.remove();
+            renderBreadcrumb(response.data.breadcrumb);
             fileTypeRenderers[response.fileType](response.data);
             break;
         case 202:
@@ -48,6 +51,44 @@ function catchError(e) {
     showError(e.message);
 }
 
+var breadcrumbDiv = document.querySelector('#breadcrumb');
+function renderBreadcrumb(bc) {
+    var breadcrumb = bc.slice(0);
+    var isRoot = bc.length === 1 && bc[0] === '';
+    if (!isRoot) {
+        // Prepend a root item only when it's not root
+        breadcrumb.unshift('');
+    }
+
+    var links = renderBreadcrumbLinks(butlast(breadcrumb));
+    for (var i = 0; i < links.length; i++) {
+        breadcrumbDiv.appendChild(links[i]);
+    }
+
+    var lastElement = document.createElement('div');
+    lastElement.textContent = breadcrumb[breadcrumb.length - 1] || '/';
+    breadcrumbDiv.appendChild(lastElement);
+
+    breadcrumbDiv.hidden = false;
+}
+
+function renderBreadcrumbLinks(items) {
+    return items.map(function(item, index) {
+        var breadcrumbItem = document.createElement('div');
+        var breadcrumbAnchor = document.createElement('a');
+        breadcrumbAnchor.textContent = item || '/';
+        breadcrumbAnchor.href = breadcrumbUrl(item, index);
+        breadcrumbItem.appendChild(breadcrumbAnchor);
+        return breadcrumbItem;
+    });
+}
+
+function breadcrumbUrl(item, index) {
+    var begin = window.location.pathname.split('/').slice(0, 5).join('/');
+    var rest = window.location.pathname.split('/').slice(5);
+    return format('%s/%s', begin, rest.slice(0, index).join('/'));
+}
+
 function fileRenderer(data) {
 }
 
@@ -65,7 +106,9 @@ function findSource(source) {
 
     return new Promise(function(resolve, request) {
         // We're doing the xhr request manually since
-        // we need the status code
+        // we need the status code.
+        // Eventually, all the XHRs will use this system,
+        // so this special snowflake won't be needed.
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (xhr.readyState !== 4) {
