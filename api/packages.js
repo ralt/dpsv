@@ -13,7 +13,7 @@ Promise.promisifyAll(fs);
 const execAsync = Promise.promisify(exec);
 
 const db = require('../shared/db');
-const downloadSource = require('../shared/download-source');
+const downloadArchive = require('../shared/download-archive');
 
 module.exports = function(req, res) {
     const parts = req.url.split('/').slice(3);
@@ -106,7 +106,7 @@ function downloadSource(name, version) {
     const archiveUrl = f(sourceArchiveUrl, name[0], name, name, version);
     const debianArchiveUrl = f(debianSourceArchiveUrl, name[0], name, name, version);
 
-    [downloadSource(archiveUrl), downloadSource(debianArchiveUrl)].spread(function(archive, debianArchive) {
+    [downloadArchive(archiveUrl), downloadArchive(debianArchiveUrl)].spread(function(archive, debianArchive) {
         return [
             fs.writeFileAsync(
                 getArchiveFilename(name, version),
@@ -115,17 +115,17 @@ function downloadSource(name, version) {
             fs.writeFileAsync(
                 getDebianArchiveFilename(name, version),
                 debianArchive
-            ),
+            )
         ];
-    }).spread(function() {
+    }).then(function() {
         // First, extract the original source,
         // then, the debian archive.
-            return execAsync(f(
-                'mkdir -p %s && tar xf %s --strip-components=1 -C %s',
-                getSourceFolder(name, version),
-                getArchiveFilename(name, version),
-                getSourceFolder(name, version)
-            ));
+        return execAsync(f(
+            'mkdir -p %s && tar xf %s --strip-components=1 -C %s',
+            getSourceFolder(name, version),
+            getArchiveFilename(name, version),
+            getSourceFolder(name, version)
+        ));
     }).then(function() {
         return execAsync(f(
             'tar xf %s -C %s',
@@ -140,6 +140,8 @@ function downloadSource(name, version) {
                 values: [getSourceFolder(name, version)]
             });
         });
+    }).catch(function(err) {
+        log(err);
     });
 }
 
