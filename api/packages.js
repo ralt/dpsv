@@ -15,10 +15,14 @@ const execAsync = Promise.promisify(exec);
 const db = require('../shared/db');
 const downloadArchive = require('../shared/download-archive');
 
+let locks = [];
+
 module.exports = function(req, res) {
     const parts = req.url.split('/').slice(3);
+    const lockName = getLockName(parts[1], parts[2]);
+
     Promise.using(db(), function(client) {
-        client.queryAsync({
+        return client.queryAsync({
             name: 'get_entries',
             text: 'select distribution, name, version from source where distribution = $1 and name = $2 and version = $3',
             values: [parts[0], parts[1], parts[2]]
@@ -31,21 +35,16 @@ module.exports = function(req, res) {
                 return res.endWith(400);
             }
 
-            return client.queryAsync({
-                name: 'get_lock',
-                text: 'select * from lock where name = $1',
-                values: [getLockName(parts[1], parts[2])]
-            });
-        }).get(0).then(function(result) {
-            if (result.rowCount === 1) {
-                // We've already started downloading the archives
+            if (locks.indexOf(lockName) > -1) {
                 return res.endWith(202);
             }
+
+            locks.push(lockName);
 
             return client.queryAsync({
                 name: 'get_source_folder',
                 text: 'select path from source_folder where path like $1',
-                values: [f('%%%s/%s', parts[1], parts[2])]
+                values: [f('%%%s_%s', parts[1], parts[2])]
             }).get(0).then(function(result) {
                 if (result.rowCount > 0) {
                     return renderFilename(result.rows[0].path, parts.slice(3).join('/'), res);
@@ -57,11 +56,14 @@ module.exports = function(req, res) {
 
                 return downloadSource(parts[1], parts[2]);
             });
-        }).catch(function(err) {
-            log(err);
-            res.statusCode = 500;
-            res.end();
         });
+    }).then(function() {
+        // Let's not forget to release the lock.
+        locks.splice(locks.indexOf(lockName), 1);
+    }).catch(function(err) {
+        log(err);
+        res.statusCode = 500;
+        res.end();
     });
 };
 
@@ -116,14 +118,11 @@ function downloadSource(name, version) {
     const archiveUrl = f(sourceArchiveUrl, name[0], name, name, getOrigVersion(version));
     const debianArchiveUrl = f(debianSourceArchiveUrl, name[0], name, name, version);
 
-    Promise.using(db(), function(client) {
-        return client.queryAsync({
-            name: 'set_lock',
-            text: 'insert into lock (name) values ($1)',
-            values: [getLockName(name, version)]
-        }).then(function() {
-            return [downloadArchive(archiveUrl), downloadArchive(debianArchiveUrl)];
-        }).spread(function(archive, debianArchive) {
+    return Promise.using(db(), function(client) {
+        return Promise.all([
+            downloadArchive(archiveUrl),
+            downloadArchive(debianArchiveUrl)
+        ]).spread(function(archive, debianArchive) {
             return [
                 fs.writeFileAsync(
                     getArchiveFilename(name, version),
@@ -150,13 +149,6 @@ function downloadSource(name, version) {
                 getSourceFolder(name, version)
             ));
         }).then(function() {
-            return [
-                fs.openAsync(getArchiveFileName(name, version), 'r'),
-                fs.openAsync(getDebianArchiveFileName(name, version), 'r')
-            ];
-        }).map(function(fd) {
-            return fs.fsyncAsync(fd);
-        }).then(function() {
             return client.queryAsync({
                 name: 'insert_source_folder',
                 text: 'insert into source_folder (path) values($1)',
@@ -168,13 +160,6 @@ function downloadSource(name, version) {
                 fs.unlinkAsync(getArchiveFilename(name, version)),
                 fs.unlinkAsync(getDebianArchiveFilename(name, version))
             ];
-        }).then(function() {
-            // Let's not forget to release the lock.
-            client.queryAsync({
-                name: 'release_lock',
-                text: 'delete from lock where name = $1',
-                values: [getLockName(name, version)]
-            });
         }).catch(function(err) {
             log(err);
         });
