@@ -38,6 +38,10 @@ body {
     display: inline-block;
 }
 
+.footer a {
+    color: #666;
+}
+
 .search {
     width: 50%;
     padding: 15px;
