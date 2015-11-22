@@ -136,8 +136,13 @@ body {
 
 .file-container {
     text-align: left;
-    border: 1px solid;
     word-wrap: break-word;
+    border: 1px solid;
+}
+
+.highlighttable {
+    font-size: 1.1em;
+    width: 100%;
 }
 
 .linenodiv a {
@@ -149,9 +154,8 @@ body {
     margin: 0 10px;
 }
 
-/* Below is pygments default css. Don't touch it. */
+/* Below is pygments default css. */
 .highlight .hll { background-color: #ffffcc }
-.highlight  { background: #f8f8f8; }
 .highlight .c { color: #408080; font-style: italic }
 .highlight .err { border: 1px solid #FF0000 }
 .highlight .k { color: #008000; font-weight: bold }
