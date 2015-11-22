@@ -33,7 +33,7 @@ module.exports = function(path, filename, res) {
 };
 
 function renderFile(realpath) {
-    const pygmentizedPath = f('%s.html', realpath);
+    const pygmentizedPath = f('%s.pygmentized.html', realpath);
     return fs.readFileAsync(pygmentizedPath, 'utf-8').catch(function(err) {
         if (err.code !== 'ENOENT') {
             // We only handle non-existing files.
