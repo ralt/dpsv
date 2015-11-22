@@ -2,6 +2,9 @@
 
 const fs = require('fs');
 const f = require('util').format;
+const log = require('util').log;
+const exec = require('child_process').exec;
+const path = require('path');
 
 const Promise = require('bluebird');
 
@@ -9,11 +12,15 @@ const db = require('../shared/db');
 const downloadArchive = require('../shared/download-archive');
 
 Promise.promisifyAll(fs);
+const execAsync = Promise.promisify(exec);
 
 /*
  Debian sources are in 2 parts:
    - The 1st archive is the original upstream source.
    - The 2nd archive is the debian/ folder added by debian maintainers.
+
+ Sometimes, the 2nd archive is a .diff.gz instead of a .debian.tar.xz.
+ This is not yet supported.
  */
 const sourceArchiveUrl = 'http://http.debian.net/debian/pool/main/%s/%s/%s_%s.orig.tar.gz';
 const debianSourceArchiveUrl = 'http://http.debian.net/debian/pool/main/%s/%s/%s_%s.debian.tar.xz';

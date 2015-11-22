@@ -4,13 +4,10 @@ const http = require('http');
 const log = require('util').log;
 const f = require('util').format;
 const fs = require('fs');
-const path = require('path');
-const exec = require('child_process').exec;
 
 const Promise = require('bluebird');
 
 Promise.promisifyAll(fs);
-const execAsync = Promise.promisify(exec);
 
 const db = require('../shared/db');
 
