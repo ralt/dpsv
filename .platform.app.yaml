@@ -3,7 +3,7 @@ type: nodejs:4.2
 
 web:
     commands:
-        start: "SOURCES_FOLDER=~/sources npm run web"
+        start: "SOURCES_FOLDER=~/sources npm run web &>> logs/web.log"
 
     locations:
         "/static":
@@ -15,6 +15,7 @@ disk: 4096
 
 mounts:
     "/sources": "shared:files/sources"
+    "/logs": "shared:files/logs"
 
 relationships:
     database: "postgresql:postgresql"
@@ -27,7 +28,7 @@ hooks:
 crons:
     updater:
         spec: "0 4 * * *"
-        cmd: "npm run updater"
+        cmd: "npm run updater &>> logs/updater.log"
     deleter:
         spec: "0 * * * *"
-        cmd: "npm run deleter"
+        cmd: "npm run deleter &>> logs/deleter.log"
