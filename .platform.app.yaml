@@ -25,6 +25,10 @@ hooks:
         npm install
         npm run build
 
+dependencies:
+    python:
+        pygments: "*"
+
 crons:
     updater:
         spec: "0 4 * * *"
