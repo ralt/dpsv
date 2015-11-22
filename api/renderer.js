@@ -49,7 +49,9 @@ function renderFile(realpath) {
         }).catch(function(err) {
             log(err);
             // If we can't run pygmentize on it, just return the raw file
-            return f('<pre>%s</pre>', fs.readFileAsync(realpath, 'utf-8'));
+            return fs.readFileAsync(realpath, 'utf-8');
+        }).then(function(content) {
+            return f('<pre>%s</pre>', content);
         });
     });
 }
