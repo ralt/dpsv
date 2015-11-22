@@ -10,16 +10,18 @@ const database = JSON.parse(
         JSON.stringify({
             database: [{
                 username: 'dpsv',
-                database: 'dpsv',
-                password: 'password'
+                path: 'dpsv',
+                password: 'password',
+                host: '127.0.0.1'
             }]
         })
 ).database[0];
 
 const connObj = {
     user: database.username,
-    database: database.database,
-    password: database.password
+    database: database.path,
+    password: database.password,
+    host: database.host
 };
 
 Promise.promisifyAll(pg, { multiArgs: true });
