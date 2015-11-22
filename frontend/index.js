@@ -8,32 +8,43 @@ const path = require('path');
 
 const Promise = require('bluebird');
 
+const db = require('../shared/db');
+
 Promise.promisifyAll(fs);
 
 const templatesDir = path.join(__dirname, '..', 'templates');
 
 module.exports = function(req, res) {
-    res.setHeader('Content-Type', 'text/html');
+    Promise.using(db(), function(client) {
+        return client.queryAsync({
+            name: 'get_maintenance_mode',
+            text: 'select value from maintenance_mode',
+            values: []
+        }).get(0).get('rows').get(0).then(function(mode) {
+            if (mode === 'on') {
+                res.statusCode = 503;
+                return res.end(http.STATUS_CODES[503]);
+            }
 
-    const path = url.parse(req.url);
+            res.setHeader('Content-Type', 'text/html');
 
-    if (path.pathname === '/' || path.pathname.match(/^\/search\/?/)) {
-        // One week cache
-        return loadPage(res, 'search', 604800);
-    }
+            const path = url.parse(req.url);
 
-    if (path.pathname.split('/')[1] === 'packages') {
-        // 24-hours cache
-        return loadPage(res, 'packages', 86400);
-    }
+            if (path.pathname === '/' || path.pathname.match(/^\/search\/?/)) {
+                // One week cache
+                return loadPage(res, 'search', 604800);
+            }
 
-    return pageNotFound(res);
+            if (path.pathname.split('/')[1] === 'packages') {
+                // 24-hours cache
+                return loadPage(res, 'packages', 86400);
+            }
+
+            res.statusCode = 404;
+            return res.end(http.STATUS_CODES[404]);
+        });
+    });
 };
-
-function pageNotFound(res) {
-    res.statusCode = 404;
-    return res.end(http.STATUS_CODES[404]);
-}
 
 function setCacheDuration(res, duration) {
     res.setHeader('Cache-Control', format('public, max-age=%d', duration));

@@ -73,7 +73,6 @@ $ npm run build # Builds the assets
 
 ### TODO
 
-- Add a maintenance mode while the updater is run
 - Define and implement API caching
 - Refactor to be consistent in usage of HTTP status codes
 

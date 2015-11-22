@@ -17,3 +17,9 @@ create table source_folder (
     path varchar(255) primary key,
     created timestamp not null default current_timestamp
 );
+
+create table maintenance_mode (
+    value varchar(5)
+);
+
+insert into maintenance_mode (value) values('off');
