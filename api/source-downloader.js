@@ -43,7 +43,7 @@ module.exports = function(name, version, directory, archive, debianArchive) {
 
 function downloadAndExtractArchive(archive, sourceFolder, directory, isDebian) {
     if (!archive) {
-        return;
+        return Promise.resolve();
     }
 
     const archiveUrl = f(sourceArchiveBaseUrl, directory, archive);
