@@ -140,6 +140,11 @@ body {
     border: 1px solid;
 }
 
+.file-container > pre {
+    font-size: 1.1em;
+    padding: 0 10px;
+}
+
 .highlighttable {
     font-size: 1.1em;
     width: 100%;
