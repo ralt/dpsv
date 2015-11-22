@@ -3,10 +3,23 @@
 const Promise = require('bluebird');
 const pg = require('pg');
 
+const database = JSON.parse(
+    process.env.PLATFORM_RELATIONSHIPS ?
+        new Buffer(process.env.PLATFORM_RELATIONSHIPS, 'base64').toString('ascii') :
+        // Development settings
+        JSON.stringify({
+            database: [{
+                username: 'dpsv',
+                database: 'dpsv',
+                password: 'password'
+            }]
+        })
+).database[0];
+
 const connObj = {
-    user: 'dpsv',
-    database: 'dpsv',
-    password: 'password'
+    user: database.username,
+    database: database.database,
+    password: database.password
 };
 
 Promise.promisifyAll(pg, { multiArgs: true });

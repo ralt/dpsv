@@ -1,0 +1,33 @@
+name: dpsv
+type: nodejs:4.2
+
+web:
+    commands:
+        start: "SOURCE_FOLDER=~/sources npm run web"
+
+    locations:
+        "/static":
+            root: "static"
+            passthru: true
+            expires: 1w
+
+disk: 4096
+
+mounts:
+    "/sources": "shared:files/sources"
+
+relationships:
+    database: "postgresql:postgresql"
+
+hooks:
+    build: |
+        npm install
+        npm run build
+
+crons:
+    updater:
+        spec: "0 4 * * *"
+        cmd: "npm run updater"
+    deleter:
+        spec: "0 * * * *"
+        cmd: "npm run deleter"
