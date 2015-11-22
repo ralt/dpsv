@@ -3,7 +3,7 @@ type: nodejs:4.2
 
 web:
     commands:
-        start: "SOURCE_FOLDER=~/sources npm run web"
+        start: "SOURCES_FOLDER=~/sources npm run web"
 
     locations:
         "/static":

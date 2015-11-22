@@ -25,7 +25,7 @@ const execAsync = Promise.promisify(exec);
 const sourceArchiveUrl = 'http://http.debian.net/debian/pool/main/%s/%s/%s_%s.orig.tar.gz';
 const debianSourceArchiveUrl = 'http://http.debian.net/debian/pool/main/%s/%s/%s_%s.debian.tar.xz';
 
-const baseFolder = process.env.BASE_FOLDER || '/tmp';
+const baseFolder = process.env.SOURCES_FOLDER || '/tmp';
 
 module.exports = function(name, version) {
     const archiveUrl = f(
