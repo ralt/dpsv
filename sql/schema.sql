@@ -6,6 +6,10 @@ create table source (
     distribution distribution not null,
     component component not null default 'main',
     version varchar(255) not null,
+    directory varchar(255) not null,
+    -- original_archive can be empty when debian is the upstream
+    original_archive varchar(255),
+    debian_archive varchar(255) not null,
     primary key(name, distribution, version)
 );
 

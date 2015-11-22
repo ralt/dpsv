@@ -36,8 +36,8 @@ function insertEntry(source) {
     return Promise.using(db(), function(client) {
         return client.queryAsync({
             name: 'insert_source',
-            text: 'insert into source(name, distribution, version) values ($1, $2, $3)',
-            values: [source.name, source.distribution, source.version]
+            text: 'insert into source(name, distribution, version, directory, original_archive, debian_archive) values ($1, $2, $3, $4, $5, $6)',
+            values: [source.name, source.distribution, source.version, source.directory, source.original_archive, source.debian_archive]
         });
     });
 }

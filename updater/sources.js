@@ -46,16 +46,66 @@ function parseSources(distribution) {
 function parseSource(distribution) {
     return function(source) {
         const lines = source.split(/\n/);
+
+        const filesLines = getEntry(lines, 'Files:');
+        const parsedFilesLines = parseFilesLines(filesLines);
+
         return {
-            name: getLine(lines, 'Package:'),
-            version: getLine(lines, 'Version:'),
-            distribution: distribution
+            name: getEntry(lines, 'Package:')[0],
+            version: getEntry(lines, 'Version:')[0],
+            distribution: distribution,
+            directory: getEntry(lines, 'Directory:')[0],
+            original_archive: parsedFilesLines.original_archive,
+            debian_archive: parsedFilesLines.debian_archive
         };
     };
 }
 
-function getLine(lines, begin) {
-    return lines.find(function(line) {
-        return line.indexOf(begin) === 0;
-    }).match(/:(.+)$/)[1].trim();
+function parseFilesLines(lines) {
+    const parsedLines = lines.map(function(line) {
+        const parts = line.split(' ');
+        return {
+            md5sum: parts[0],
+            size: parts[1],
+            filename: parts[2]
+        };
+    });
+    return {
+        original_archive: getOriginalArchive(parsedLines),
+        debian_archive: getDebianArchive(parsedLines)
+    };
+}
+
+function getOriginalArchive(parsedLines) {
+    for (var i = 0; i < parsedLines.length; i++) {
+        if (parsedLines[i].filename.match(/\.orig\.tar\.(b|g|x)z2?$/)) {
+            return parsedLines[i].filename;
+        }
+    }
+}
+
+function getDebianArchive(parsedLines) {
+    for (var i = 0; i < parsedLines.length; i++) {
+        if (!parsedLines[i].filename.match(/\.orig\.tar\.(b|g|x)z2?$/) &&
+            parsedLines[i].filename.match(/(\.tar\.(b|g|x)z2?|\.diff\.gz)$/)) {
+            return parsedLines[i].filename;
+        }
+    }
+}
+
+function getEntry(lines, begin) {
+    var ret = [];
+    for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf(begin) < 0) {
+            continue;
+        }
+        var match;
+        if ((match = lines[i].match(/:(.+)$/))) {
+            ret.push(match[1].trim());
+        }
+        while (/^ .+/.test(lines[++i])) {
+            ret.push(lines[i].trim());
+        }
+        return ret;
+    }
 }
