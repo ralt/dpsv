@@ -11,7 +11,7 @@ module.exports = {
 };
 
 function fileRenderer(content) {
-    fileDiv.textContent = content;
+    fileDiv.innerHTML = content;
     fileDiv.hidden = false;
 }
 

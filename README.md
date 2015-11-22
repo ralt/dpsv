@@ -73,10 +73,6 @@ $ npm run build # Builds the assets
 
 ### TODO
 
-- Use pygmentize store syntax highlighted files and display them.
-
-        pygmentize -o test.html -O linenos=1,lineanchors=L,anchorlinenos=1 test.js
-
 - Support .diff.gz
 - Add a maintenance mode while the updater is run
 - Define and implement API caching
