@@ -24,29 +24,32 @@ const sourceArchiveBaseUrl = 'http://http.debian.net/debian/%s/%s';
 
 const baseFolder = process.env.SOURCES_FOLDER || '/tmp';
 
-module.exports = function(name, version, directory, archiveFilename, debianArchiveFilename) {
+module.exports = function(name, version, directory, archive, debianArchive) {
     const archiveUrl = f(
-        sourceArchiveBaseUrl, directory, archiveFilename
+        sourceArchiveBaseUrl, directory, archive
     );
     const debianArchiveUrl = f(
-        sourceArchiveBaseUrl, directory, debianArchiveFilename
+        sourceArchiveBaseUrl, directory, debianArchive
     );
 
-    const sourceFolder = getSourceFolder(name, version);
+    const archiveFilename = path.join(baseFolder, archive);
+    const debianArchiveFilename = path.join(baseFolder, debianArchive);
+
+    const sourceFolder = path.join(baseFolder, f('%s_%s', name, version));
 
     return Promise.using(db(), function(client) {
         return Promise.all([
             downloadArchive(archiveUrl),
             downloadArchive(debianArchiveUrl)
-        ]).spread(function(archive, debianArchive) {
+        ]).spread(function(archiveContent, debianArchiveContent) {
             return [
                 fs.writeFileAsync(
                     archiveFilename,
-                    archive
+                    archiveContent
                 ),
                 fs.writeFileAsync(
                     debianArchiveFilename,
-                    debianArchive
+                    debianArchiveContent
                 )
             ];
         }).then(function() {
