@@ -18,25 +18,20 @@ const execAsync = Promise.promisify(exec);
  Debian sources are in 2 parts:
    - The 1st archive is the original upstream source.
    - The 2nd archive is the debian/ folder added by debian maintainers.
-
- Sometimes, the 2nd archive is a .diff.gz instead of a .debian.tar.xz.
- This is not yet supported.
  */
-const sourceArchiveUrl = 'http://http.debian.net/debian/pool/main/%s/%s/%s_%s.orig.tar.gz';
-const debianSourceArchiveUrl = 'http://http.debian.net/debian/pool/main/%s/%s/%s_%s.debian.tar.xz';
+
+const sourceArchiveBaseUrl = 'http://http.debian.net/debian/%s/%s';
 
 const baseFolder = process.env.SOURCES_FOLDER || '/tmp';
 
-module.exports = function(name, version) {
+module.exports = function(name, version, directory, archiveFilename, debianArchiveFilename) {
     const archiveUrl = f(
-        sourceArchiveUrl, name[0], name, name, getOrigVersion(version)
+        sourceArchiveBaseUrl, directory, archiveFilename
     );
     const debianArchiveUrl = f(
-        debianSourceArchiveUrl, name[0], name, name, version
+        sourceArchiveBaseUrl, directory, debianArchiveFilename
     );
 
-    const archiveFilename = getArchiveFilename(name, version);
-    const debianArchiveFilename = getDebianArchiveFilename(name, version);
     const sourceFolder = getSourceFolder(name, version);
 
     return Promise.using(db(), function(client) {
@@ -89,14 +84,6 @@ module.exports = function(name, version) {
 
 function getOrigVersion(version) {
     return version.replace(/-.*/, '');
-}
-
-function getArchiveFilename(name, version) {
-    return path.join(baseFolder, path.sep, f('%s_%s.orig.tar.gz', name, version));
-}
-
-function getDebianArchiveFilename(name, version) {
-    return path.join(baseFolder, path.sep, f('%s_%s.tar.xz', name, version));
 }
 
 function getSourceFolder(name, version) {

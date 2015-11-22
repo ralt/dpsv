@@ -23,7 +23,7 @@ module.exports = function(req, res) {
     Promise.using(db(), function(client) {
         return client.queryAsync({
             name: 'get_entries',
-            text: 'select distribution, name, version from source where distribution = $1 and name = $2 and version = $3',
+            text: 'select distribution, name, version, directory, original_archive, debian_archive from source where distribution = $1 and name = $2 and version = $3',
             values: [parts[0], parts[1], parts[2]]
         }).get(0).get('rows').then(function(entries) {
             if (entries.length === 0) {
@@ -53,7 +53,13 @@ module.exports = function(req, res) {
                 // so tell the client to come back later.
                 res.endWith(202);
 
-                return downloadSource(parts[1], parts[2]);
+                return downloadSource(
+                    parts[1],
+                    parts[2],
+                    entries[0].directory,
+                    entries[0].original_archive,
+                    entries[0].debian_archive
+                );
             });
         });
     }).then(function() {
