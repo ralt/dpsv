@@ -23,7 +23,8 @@ module.exports = function(req, res) {
         }).get(0).get('rows').get(0).then(function(mode) {
             if (mode === 'on') {
                 res.statusCode = 503;
-                return res.end(http.STATUS_CODES[503]);
+                res.setHeader('Content-Type', 'text/plain');
+                return res.end(maintenanceModeMessage());
             }
 
             res.setHeader('Content-Type', 'text/html');
@@ -45,6 +46,15 @@ module.exports = function(req, res) {
         });
     });
 };
+
+function maintenanceModeMessage() {
+    return [
+        "I am currently in maintenance mode.",
+        "This means that I am updating my local index of Debian sources.",
+        "This usually takes less than 10 minutes, so please come back a bit later, I should be fine by then.",
+        "Have a nice day!"
+    ].join('\n\n');
+}
 
 function setCacheDuration(res, duration) {
     res.setHeader('Cache-Control', format('public, max-age=%d', duration));
