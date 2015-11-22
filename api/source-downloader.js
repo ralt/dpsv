@@ -27,9 +27,9 @@ const baseFolder = process.env.SOURCES_FOLDER || '/tmp';
 module.exports = function(name, version, directory, archive, debianArchive) {
     const sourceFolder = path.join(baseFolder, f('%s_%s', name, version));
 
-    return Promise.each([
+    return Promise.all([
         downloadAndExtractArchive(archive, sourceFolder, directory),
-        downloadAndExtractArchive(debianArchive, sourceFolder, directory, true)
+        downloadAndExtractArchive(debianArchive, sourceFolder, directory, true, !archive)
     ]).then(function() {
         return Promise.using(db(), function(client) {
             return client.queryAsync({
@@ -41,9 +41,9 @@ module.exports = function(name, version, directory, archive, debianArchive) {
     });
 };
 
-function downloadAndExtractArchive(archive, sourceFolder, directory, isDebian) {
+function downloadAndExtractArchive(archive, sourceFolder, directory, isDebian, isOnlyArchive) {
     if (!archive) {
-        return Promise.resolve();
+        return '';
     }
 
     const archiveUrl = f(sourceArchiveBaseUrl, directory, archive);
@@ -56,7 +56,7 @@ function downloadAndExtractArchive(archive, sourceFolder, directory, isDebian) {
             'mkdir -p %s && tar xf %s %s -C %s',
             sourceFolder,
             archiveFilename,
-            isDebian ? '' : '--strip-components=1',
+            (isDebian && !isOnlyArchive) ? '' : '--strip-components=1',
             sourceFolder
         ));
     }).then(function() {
