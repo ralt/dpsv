@@ -13,6 +13,12 @@ module.exports = {
 function fileRenderer(content) {
     fileDiv.innerHTML = content;
     fileDiv.hidden = false;
+    if (/#L-\d+/.test(window.location.hash)) {
+        // Small hack: empty the hash then put it back
+        var hash = window.location.hash;
+        window.location.hash = '';
+        window.location.hash = hash;
+    }
 }
 
 function folderRenderer(content) {
