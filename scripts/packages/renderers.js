@@ -51,7 +51,7 @@ function createElementFolder(item, className) {
     typeTd.textContent = item.isFolder ? 'D' : 'F';
     var nameTd = document.createElement('td');
     var nameAnchor = document.createElement('a');
-    nameAnchor.textContent = item.name;
+    nameAnchor.textContent = item.name + (item.isFolder ? '/' : '');
     nameAnchor.href = item.name + (item.isFolder ? '/' : '');
     nameTd.appendChild(nameAnchor);
     var modeTd = document.createElement('td');
