@@ -86,7 +86,7 @@ function downloadAndExtractArchive(archive, archiveSum, sourceFolder, directory,
         const md5 = crypto.createHash('md5');
         md5.update(archiveContent);
         if (md5.digest('hex') !== archiveSum) {
-            log(f("md5sums don't match for %s, retrying"));
+            log(f("md5sums don't match for %s, retrying", archiveUrl));
             return downloadAndExtractArchive.apply(null, arguments);
         }
         return fs.writeFileAsync(archiveFilename, archiveContent);
