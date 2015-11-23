@@ -6,6 +6,11 @@ const exec = require('child_process').exec;
 const log = require('util').log;
 
 const Promise = require('bluebird');
+const mm = require('mmmagic');
+
+const Magic = mm.Magic;
+Promise.promisifyAll(Magic.prototype);
+const magic = new Magic(mm.MAGIC_MIME_TYPE);
 
 Promise.promisifyAll(fs);
 
@@ -34,22 +39,28 @@ module.exports = function(path, filename, res) {
 
 function renderFile(realpath) {
     const pygmentizedPath = f('%s.pygmentized.html', realpath);
-    return fs.readFileAsync(pygmentizedPath, 'utf-8').catch(function(err) {
-        if (err.code !== 'ENOENT') {
-            // We only handle non-existing files.
-            throw err;
+    return magic.detectFileAsync(realpath).then(function(result) {
+        if (!/^text\//.test(result)) {
+            return '<pre>Not a text file.</pre>';
         }
 
-        return execAsync(f(
-            'pygmentize -o %s -O linenos=1,lineanchors=L,anchorlinenos=1 %s',
-            pygmentizedPath,
-            realpath
-        )).then(function() {
-            return fs.readFileAsync(pygmentizedPath, 'utf-8');
-        }).catch(function(err) {
-            // If we can't run pygmentize on it, just return the raw file
-            return fs.readFileAsync(realpath, 'utf-8').then(function(content) {
-                return f('<pre>%s</pre>', content);
+        return fs.readFileAsync(pygmentizedPath, 'utf-8').catch(function(err) {
+            if (err.code !== 'ENOENT') {
+                // We only handle non-existing files.
+                throw err;
+            }
+
+            return execAsync(f(
+                'pygmentize -o %s -O linenos=1,lineanchors=L,anchorlinenos=1 %s',
+                pygmentizedPath,
+                realpath
+            )).then(function() {
+                return fs.readFileAsync(pygmentizedPath, 'utf-8');
+            }).catch(function(err) {
+                // If we can't run pygmentize on it, just return the raw file
+                return fs.readFileAsync(realpath, 'utf-8').then(function(content) {
+                    return f('<pre>%s</pre>', content);
+                });
             });
         });
     });
