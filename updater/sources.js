@@ -56,7 +56,9 @@ function parseSource(distribution) {
             distribution: distribution,
             directory: getEntry(lines, 'Directory:')[0],
             original_archive: parsedFilesLines.original_archive,
-            debian_archive: parsedFilesLines.debian_archive
+            original_archive_md5sum: parsedFilesLines.original_archive_md5sum,
+            debian_archive: parsedFilesLines.debian_archive,
+            debian_archive_md5sum: parsedFilesLines.debian_archive_md5sum
         };
     };
 }
@@ -70,27 +72,32 @@ function parseFilesLines(lines) {
             filename: parts[2]
         };
     });
+
+    const originalArchive = getOriginalArchive(parsedLines);
+    const debianArchive = getDebianArchive(parsedLines);
     return {
-        original_archive: getOriginalArchive(parsedLines),
-        debian_archive: getDebianArchive(parsedLines)
+        original_archive: originalArchive ? originalArchive.filename : undefined,
+        original_archive_md5sum: originalArchive ? originalArchive.md5sum : undefined,
+        debian_archive: debianArchive.filename,
+        debian_archive_md5sum: debianArchive.md5sum
     };
 }
 
 function getOriginalArchive(parsedLines) {
-    for (var i = 0; i < parsedLines.length; i++) {
-        if (parsedLines[i].filename.match(/\.orig\.tar\.(b|g|x)z2?$/)) {
-            return parsedLines[i].filename;
+    return parsedLines.find(function(line) {
+        if (line.filename.match(/\.orig\.tar\.(b|g|x)z2?$/)) {
+            return line;
         }
-    }
+    });
 }
 
 function getDebianArchive(parsedLines) {
-    for (var i = 0; i < parsedLines.length; i++) {
-        if (!parsedLines[i].filename.match(/\.orig\.tar\.(b|g|x)z2?$/) &&
-            parsedLines[i].filename.match(/(\.tar\.(b|g|x)z2?|\.diff\.gz)$/)) {
-            return parsedLines[i].filename;
+    return parsedLines.find(function(line) {
+        if (!line.filename.match(/\.orig\.tar\.(b|g|x)z2?$/) &&
+            line.filename.match(/(\.tar\.(b|g|x)z2?|\.diff\.gz)$/)) {
+            return line;
         }
-    }
+    });
 }
 
 function getEntry(lines, begin) {

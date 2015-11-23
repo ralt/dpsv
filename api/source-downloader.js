@@ -5,6 +5,7 @@ const f = require('util').format;
 const log = require('util').log;
 const exec = require('child_process').exec;
 const path = require('path');
+const crypto = require('crypto');
 
 const Promise = require('bluebird');
 
@@ -40,7 +41,7 @@ const sourceArchiveBaseUrl = 'http://http.debian.net/debian/%s/%s';
 
 const baseFolder = process.env.SOURCES_FOLDER || '/tmp';
 
-module.exports = function(name, version, directory, archive, debianArchive) {
+module.exports = function(name, version, directory, archive, archiveSum, debianArchive, debianArchiveSum) {
     const sourceFolder = path.join(baseFolder, f('%s_%s', name, version));
 
     if (debianArchive.match(/\.diff\.gz$/)) {
@@ -48,6 +49,7 @@ module.exports = function(name, version, directory, archive, debianArchive) {
         // the .diff.gz can be completely ignored.
         return downloadAndExtractArchive(
             archive,
+            archiveSum,
             sourceFolder,
             directory,
             debianArchive
@@ -55,8 +57,8 @@ module.exports = function(name, version, directory, archive, debianArchive) {
     }
 
     return Promise.all([
-        downloadAndExtractArchive(archive, sourceFolder, directory),
-        downloadAndExtractArchive(debianArchive, sourceFolder, directory, true, !archive)
+        downloadAndExtractArchive(archive, archiveSum, sourceFolder, directory),
+        downloadAndExtractArchive(debianArchive, debianArchiveSum, sourceFolder, directory, true, !archive)
     ]).then(writeSourceFolder(sourceFolder));
 };
 
@@ -72,7 +74,7 @@ function writeSourceFolder(sourceFolder) {
     };
 }
 
-function downloadAndExtractArchive(archive, sourceFolder, directory, isDebian, isOnlyArchive) {
+function downloadAndExtractArchive(archive, archiveSum, sourceFolder, directory, isDebian, isOnlyArchive) {
     if (!archive) {
         return '';
     }
@@ -81,6 +83,12 @@ function downloadAndExtractArchive(archive, sourceFolder, directory, isDebian, i
     const archiveFilename = path.join(baseFolder, archive);
 
     return downloadArchive(archiveUrl).then(function(archiveContent) {
+        const md5 = crypto.createHash('md5');
+        md5.update(archiveContent);
+        if (md5.digest('hex') !== archiveSum) {
+            log(f("md5sums don't match for %s, retrying"));
+            return downloadAndExtractArchive.apply(null, arguments);
+        }
         return fs.writeFileAsync(archiveFilename, archiveContent);
     }).then(function() {
         return execAsync(f(

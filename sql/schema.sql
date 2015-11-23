@@ -9,7 +9,9 @@ create table source (
     directory varchar(255) not null,
     -- original_archive can be empty when debian is the upstream
     original_archive varchar(255),
+    original_archive_md5sum varchar(32),
     debian_archive varchar(255) not null,
+    debian_archive_md5sum varchar(32) not null,
     primary key(name, distribution, version)
 );
 

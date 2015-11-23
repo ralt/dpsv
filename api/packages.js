@@ -20,10 +20,10 @@ module.exports = function(req, res) {
     const parts = req.url.split('/').slice(3);
     const lockName = getLockName(parts[1], parts[2]);
 
-    Promise.using(db(), function(client) {
+    return Promise.using(db(), function(client) {
         return client.queryAsync({
             name: 'get_entries',
-            text: 'select distribution, name, version, directory, original_archive, debian_archive from source where distribution = $1 and name = $2 and version = $3',
+            text: 'select distribution, name, version, directory, original_archive, original_archive_md5sum, debian_archive, debian_archive_md5sum from source where distribution = $1 and name = $2 and version = $3',
             values: [parts[0], parts[1], parts[2]]
         }).get(0).get('rows').then(function(entries) {
             if (entries.length === 0) {
@@ -58,7 +58,9 @@ module.exports = function(req, res) {
                     parts[2],
                     entries[0].directory,
                     entries[0].original_archive,
-                    entries[0].debian_archive
+                    entries[0].original_archive_md5sum,
+                    entries[0].debian_archive,
+                    entries[0].debian_archive_md5sum
                 );
             });
         });
