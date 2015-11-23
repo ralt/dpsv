@@ -140,9 +140,10 @@ body {
     border: 1px solid;
 }
 
-.file-container > pre {
-    font-size: 1.1em;
-    padding: 0 10px;
+.file-container pre {
+    padding:10px;
+    white-space: pre-line;
+    word-wrap: break-word;
 }
 
 .highlighttable {
