@@ -57,7 +57,9 @@ function renderFile(realpath) {
 }
 
 function renderFolder(realpath) {
-    return fs.readdirAsync(realpath).map(function(filename) {
+    return fs.readdirAsync(realpath).filter(function(filename) {
+        return !filename.match(/\.pygmentized\.html$/);
+    }).map(function(filename) {
         return fs.statAsync(f('%s/%s', realpath, filename)).then(function(stat) {
             return {
                 name: filename,
