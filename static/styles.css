@@ -4,7 +4,7 @@ body {
 
 .container {
     margin: 1% auto;
-    width: 50%;
+    width: 960px;
     padding: 1% 5%;
 }
 
@@ -136,14 +136,17 @@ body {
 
 .file-container {
     text-align: left;
-    word-wrap: break-word;
     border: 1px solid;
 }
 
 .file-container pre {
-    padding:10px;
-    white-space: pre-line;
+    padding-left: 10px;
     word-wrap: break-word;
+    max-width: 880px;
+}
+
+.file-container .linenos pre {
+    padding: 0;
 }
 
 .highlighttable {
@@ -163,7 +166,7 @@ body {
 }
 
 .linenodiv {
-    margin: 0 10px;
+    margin: 0 0 0 10px;
 }
 
 /* Below is pygments default css. */
