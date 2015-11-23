@@ -62,11 +62,11 @@ module.exports = function(req, res) {
                     entries[0].debian_archive,
                     entries[0].debian_archive_md5sum
                 );
+            }).then(function() {
+                // Let's not forget to release the lock.
+                locks.splice(locks.indexOf(lockName), 1);
             });
         });
-    }).then(function() {
-        // Let's not forget to release the lock.
-        locks.splice(locks.indexOf(lockName), 1);
     }).catch(function(err) {
         log(err);
         res.statusCode = 500;
