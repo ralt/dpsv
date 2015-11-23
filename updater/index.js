@@ -10,7 +10,7 @@ const insertEntries = entries.insert;
 const deleteEntries = entries.delete;
 
 module.exports = function() {
-    return Promise.using(db(), function(client) {
+    Promise.using(db(), function(client) {
         return client.queryAsync({
             name: 'set_maintenance_mode',
             text: 'update maintenance_mode set value = $1',
@@ -24,10 +24,9 @@ module.exports = function() {
         }).get(0).get('rows').get(0).get('enum_range').then(function(range) {
             return range.match(/{(.+)}/)[1].split(',');
         }).map(function(distribution) {
-            deleteEntries(distribution)
+            return deleteEntries(distribution)
                 .then(getSources)
-                .then(insertEntries)
-                .done();
+                .then(insertEntries);
         }).then(function() {
             return client.queryAsync({
                 name: 'unset_maintenance_mode',
@@ -35,5 +34,5 @@ module.exports = function() {
                 values: ['off']
             });
         });
-    });
+    }).done();
 };

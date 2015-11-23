@@ -20,7 +20,7 @@ module.exports = function(req, res) {
             name: 'get_maintenance_mode',
             text: 'select value from maintenance_mode',
             values: []
-        }).get(0).get('rows').get(0).then(function(mode) {
+        }).get(0).get('rows').get(0).get('value').then(function(mode) {
             if (mode === 'on') {
                 res.statusCode = 503;
                 res.setHeader('Content-Type', 'text/plain');
