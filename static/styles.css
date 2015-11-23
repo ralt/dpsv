@@ -141,8 +141,8 @@ body {
 
 .file-container pre {
     padding-left: 10px;
-    word-wrap: break-word;
-    max-width: 880px;
+    max-width: 900px;
+    overflow: auto;
 }
 
 .file-container .linenos pre {
