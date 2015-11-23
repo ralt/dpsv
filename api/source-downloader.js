@@ -44,7 +44,9 @@ module.exports = function(name, version, directory, archive, debianArchive) {
     const sourceFolder = path.join(baseFolder, f('%s_%s', name, version));
 
     if (debianArchive.match(/\.diff\.gz$/)) {
-        return downloadAndPatchArchive(
+        // According to http://ftp.debian.org/debian/doc/source-unpack.txt,
+        // the .diff.gz can be completely ignored.
+        return downloadAndExtractArchive(
             archive,
             sourceFolder,
             directory,
@@ -81,11 +83,6 @@ function downloadAndExtractArchive(archive, sourceFolder, directory, isDebian, i
     return downloadArchive(archiveUrl).then(function(archiveContent) {
         return fs.writeFileAsync(archiveFilename, archiveContent);
     }).then(function() {
-        // Special archives
-        if (archiveFilename.match(/\.diff\.gz/)) {
-            return execAsync(f());
-        }
-
         return execAsync(f(
             'mkdir -p %s && tar xf %s %s -C %s',
             sourceFolder,
@@ -97,32 +94,5 @@ function downloadAndExtractArchive(archive, sourceFolder, directory, isDebian, i
         return fs.unlinkAsync(archiveFilename);
     }).catch(function(err) {
         log(err);
-    });
-}
-
-function downloadAndPatchArchive(archive, sourceFolder, directory, patchArchive) {
-    const archiveUrl = f(sourceArchiveBaseUrl, directory, archive);
-    const archiveFilename = path.join(baseFolder, archive);
-
-    const patchUrl = f(sourceArchiveBaseUrl, directory, patchArchive);
-    const patchFilename = path.join(baseFolder, archive);
-
-    return Promise.all([
-        downloadArchive(archiveUrl),
-        downloadArchive(patchUrl)
-    ]).spread(function(archiveContent, patchContent) {
-        return [
-            fs.writeFileAsync(archiveFilename, archiveContent),
-            fs.writeFileAsync(patchFilename, patchContent)
-        ];
-    }).then(function() {
-        return execAsync(f(
-            'mkdir -p %s && tar xf %s --strip-components=1 -C %s',
-            sourceFolder, archiveFilename, sourceFolder
-        ));
-    }).then(function() {
-        return execAsync(f('zcat %s | patch -p1', patchFilename));
-    }).then(function() {
-        return [fs.unlinkAsync(archiveFilename), fs.unlinkAsync(patchFilename)];
     });
 }
