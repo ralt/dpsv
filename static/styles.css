@@ -140,7 +140,7 @@ body {
     border: 1px solid;
 }
 
-.file-container > code {
+.file-container pre {
     padding:10px;
     white-space: pre-line;
     word-wrap: break-word;
