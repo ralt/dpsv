@@ -14,7 +14,7 @@ function getOldFolders() {
             name: 'get_old_folders',
             text: "select path from source_folder where created < ( now() - interval '24 hours' )",
             values: []
-        }).get('rows');
+        }).get(0).get('rows');
     });
 }
 
@@ -23,7 +23,7 @@ function deleteFolders(folders) {
 }
 
 function deleteFolderEntries(folders) {
-    return folders.map(deleteFolderEntry);
+    return Promise.map(folders, deleteFolderEntry);
 }
 
 function deleteFolderEntry(folder) {
@@ -31,11 +31,15 @@ function deleteFolderEntry(folder) {
         return client.queryAsync({
             name: 'delete_folder',
             text: 'delete from source_folder where path = $1',
-            values: [folder]
+            values: [folder.path]
         });
+    }).then(function() {
+        return folder.path;
     });
 }
 
 function deleteFilesystemFolders(folders) {
-    return folders.map(rmdir);
+    return folders.map(function(f) {
+        rmdir(f, {});
+    });
 }
