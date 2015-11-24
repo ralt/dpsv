@@ -28,6 +28,8 @@ module.exports = function(req, res) {
                 ret.results = entries;
             }
 
+            // 24h caching, since the updater runs every day.
+            res.setHeader('Cache-Control', 'public, max-age=86400');
             res.end(JSON.stringify(ret, null, 4));
         }).catch(function(err) {
             log(err);
